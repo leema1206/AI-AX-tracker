@@ -168,6 +168,26 @@
     }
     .result-content li { margin: 4px 0; }
 
+    /* ── 이모지 타이틀 (💡 추천 사유, 🔗 사전등록, ■ 행사명 등) ── */
+    .result-content .emoji-title {
+      display: block;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #2d3748;
+      margin-top: 18px;
+      margin-bottom: 2px;
+      line-height: 1.5;
+    }
+    .result-content .emoji-title-link {
+      display: block;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #667eea;
+      margin-top: 14px;
+      margin-bottom: 2px;
+      line-height: 1.5;
+    }
+
     /* ── 에러 ── */
     .error-box {
       background: #fff5f5;
@@ -260,6 +280,38 @@
 </div>
 
 <script>
+  // ── marked.js: 링크 새 창으로 열기 ──
+  const renderer = new marked.Renderer();
+  renderer.link = function(href, title, text) {
+    const titleAttr = title ? ` title="${title}"` : '';
+    return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
+  marked.use({ renderer });
+
+  // ── 브리핑 HTML 렌더링 + 이모지 타이틀 후처리 ──
+  function renderBriefing(text) {
+    const html = marked.parse(text);
+    const div  = document.createElement('div');
+    div.innerHTML = html;
+
+    div.querySelectorAll('p').forEach(p => {
+      const t = p.textContent.trim();
+      if (t.startsWith('🔗')) {
+        p.classList.add('emoji-title-link');
+      } else if (
+        t.startsWith('💡') ||
+        t.startsWith('■')  ||
+        t.startsWith('📌') ||
+        t.startsWith('📍') ||
+        t.startsWith('🌐')
+      ) {
+        p.classList.add('emoji-title');
+      }
+    });
+
+    return div.innerHTML;
+  }
+
   // ── 날짜 기본값: 오늘 ──
   document.getElementById('dateInput').valueAsDate = new Date();
 
@@ -313,7 +365,7 @@
 
       // 3. 결과 표시
       document.getElementById('loading').style.display   = 'none';
-      document.getElementById('resultContent').innerHTML = marked.parse(briefing);
+      document.getElementById('resultContent').innerHTML = renderBriefing(briefing);
       document.getElementById('resultCard').style.display = 'block';
 
     } catch (e) {
