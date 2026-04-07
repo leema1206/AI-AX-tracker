@@ -351,20 +351,19 @@
 </div>
 
 <script>
-  // ── marked.js: 링크 새 창으로 열기 ──
-  const renderer = new marked.Renderer();
-  renderer.link = function(href, title, text) {
-    const titleAttr = title ? ` title="${title}"` : '';
-    return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
-  };
-  marked.use({ renderer });
-
-  // ── 브리핑 HTML 렌더링 + 이모지 타이틀 후처리 ──
+  // ── 브리핑 HTML 렌더링 + 이모지 타이틀 후처리 + 링크 새 창 ──
   function renderBriefing(text) {
     const html = marked.parse(text);
     const div  = document.createElement('div');
     div.innerHTML = html;
 
+    // 링크 새 창으로 열기 (marked.js 버전 무관하게 DOM에서 직접 처리)
+    div.querySelectorAll('a').forEach(a => {
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+    });
+
+    // 이모지 타이틀 스타일 적용
     div.querySelectorAll('p').forEach(p => {
       const t = p.textContent.trim();
       if (t.startsWith('🔗')) {
