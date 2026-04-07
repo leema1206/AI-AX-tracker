@@ -353,7 +353,13 @@
 <script>
   // ── 브리핑 HTML 렌더링 + 이모지 타이틀 후처리 + 링크 새 창 ──
   function renderBriefing(text) {
-    const html = marked.parse(text);
+    // 날 URL(https://...)을 마크다운 링크 형식으로 변환
+    // 이미 [텍스트](url) 형태인 경우는 건너뜀 (lookbehind로 구분)
+    const processed = text.replace(
+      /(?<!\()(https?:\/\/[^\s<>"')\]]+)/g,
+      '[$1]($1)'
+    );
+    const html = marked.parse(processed);
     const div  = document.createElement('div');
     div.innerHTML = html;
 
